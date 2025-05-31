@@ -47,7 +47,7 @@ def abrir_dados_processados():
 def gerar_grafico(dados_processados):
     # Filtro por ano
     anos = dados_processados.index.unique()
-    ano_selecionado = st.selectbox("Selecione o ano", anos)
+    ano_selecionado = st.selectbox("Selecione o ano", anos, key="CandidatosGenero")
 
     # Filtrar linha do ano escolhido
     linha = dados_processados[dados_processados.index == ano_selecionado].iloc[0]
