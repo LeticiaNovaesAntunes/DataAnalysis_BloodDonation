@@ -1,55 +1,73 @@
 import streamlit as st
-import matplotlib.pyplot as plt
-import plotly.express as px
-import pandas as pd
+from totalDoacoes import calcular_total_doacoes
+import candidatosGenero
+import candidatosIdade 
+from doacaoPorAno import exibir_grafico_doadores_por_ano
+import os
 
-st.set_page_config(page_title="Natasha é uma diva :)", layout="centered")
+st.set_page_config(page_title="...", layout="wide")
+st.title("🩸 Análise de Doações de Sangue no Estado de SP")
 
-st.title("📊 Natasha é uma diva")
+col1, col2 = st.columns(2)
 
-# Dados para gráficos de barra e coluna
-df = pd.DataFrame({
-    'Categoria': ['A', 'B', 'C', 'D'],
-    'Valor': [10, 23, 15, 7]
-})
+with col1:
 
-# Dados para gráfico de linha
-df_line = pd.DataFrame({
-    'Dia': pd.date_range(start='2025-05-01', periods=7),
-    'Valor': [10, 12, 9, 14, 18, 13, 17]
-})
+   
 
-# Abas para os gráficos
-aba1, aba2, aba3 = st.tabs(["📉 Barras Horizontais", "📊 Colunas Verticais", "📈 Linha Interativa"])
+    # Filtro Ano
+    ano_selecionado = st.sidebar.selectbox(
+        "Ano",
+        ("Todos", "2022", "2023", "2024")
+    )
 
-with aba1:
-    st.subheader("Gráfico de Barras Horizontais")
-    fig_bar = px.bar(df,
-                     x='Valor',
-                     y='Categoria',
-                     orientation='h',
-                     title='Barras Horizontais',
-                     color_discrete_sequence=['#ff69b4'])
-    fig_bar.update_layout(plot_bgcolor='white', title_font_color='#ff69b4')
-    st.plotly_chart(fig_bar)
+    # Caminho do arquivo CSV (corrigido com os.path para compatibilidade)
+    caminho_csv = os.path.join("dados", "ImunoHematologia.csv")
 
-with aba2:
-    st.subheader("Gráfico de Colunas Verticais")
-    fig_col = px.bar(df,
-                     x='Categoria',
-                     y='Valor',
-                     title='Colunas Verticais',
-                     color_discrete_sequence=['#ff1493'])  # rosa escuro
-    fig_col.update_layout(plot_bgcolor='white', title_font_color='#ff1493')
-    st.plotly_chart(fig_col)
+    # Chama a função do outro módulo
+    total_doacoes = calcular_total_doacoes(caminho_csv, ano_selecionado)
+    
 
-with aba3:
-    st.subheader("Gráfico de Linha Interativo")
-    fig_line = px.line(df_line,
-                       x='Dia',
-                       y='Valor',
-                       markers=True,
-                       title='Linha Temporal',
-                       color_discrete_sequence=['#ff69b4'])
-    fig_line.update_layout(plot_bgcolor='white', title_font_color='#ff69b4')
-    st.plotly_chart(fig_line)
+    # Exibe cartão com total de doações
+    if isinstance(total_doacoes, int):
+        st.markdown(
+            f"""
+            <div style="background-color:#8e0000; padding:30px; items-align: center; border-radius:10px; width:300px">
+                <h4 style="color:white;">Total de Doações</h4>
+                <h1 style="color:white;">{total_doacoes:,}</h1>
+                <p style="color:white;">Ano: <strong>{ano_selecionado}</strong></p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    else:
+        st.error(total_doacoes)
+
+with col2:
+        #Gráfico analis doação nos anos
+
+    if caminho_csv is not None:
+        exibir_grafico_doadores_por_ano(caminho_csv)
+
+
+
+# Gráfico de candidatos por gênero
+try:
+    # abrir_dados_processados() só carrega e processa os dados, não recebe argumentos
+    dados_processados = candidatosGenero.abrir_dados_processados()
+    
+    # gerar_grafico recebe os dados processados e o ano selecionado
+    candidatosGenero.gerar_grafico(dados_processados, ano_selecionado)
+except Exception as e:
+    st.error(f"Erro ao gerar gráfico de gênero: {e}")
+
+
+#Gráfico Idade dos doadores
+try:
+    dados_processados_idade = candidatosIdade.abrir_dados_processados()
+    candidatosIdade.gerar_grafico(dados_processados_idade, ano_selecionado)
+except Exception as e:
+    st.error(f"Erro ao gerar gráfico de idade: {e}")
+ 
+
+
+ 
