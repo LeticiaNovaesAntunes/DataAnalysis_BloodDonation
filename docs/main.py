@@ -2,6 +2,8 @@ import streamlit as st
 from totalDoacoes import calcular_total_doacoes
 import candidatosGenero
 import candidatosIdade 
+import tipoMaisDoado
+import analiseTriagemDoencas
 from doacaoPorAno import exibir_grafico_doadores_por_ano
 import os
 
@@ -67,7 +69,17 @@ try:
     candidatosIdade.gerar_grafico(dados_processados_idade, ano_selecionado)
 except Exception as e:
     st.error(f"Erro ao gerar gráfico de idade: {e}")
- 
 
+#Gráfico de Comparação dos tipos de sangue mais doados e mais recebidos
+try:
+    dados_processados_tipo_doado = tipoMaisDoado.abrir_dados_processados()
+    tipoMaisDoado.gerar_grafico(dados_processados_tipo_doado, ano_selecionado)
+except Exception as e:
+    st.error(f"Erro ao gerar gráfico de tipos de sangue doados e recebidos: {e}")
 
+try:
+    dados_processados_inaptidao_triagem = analiseTriagemDoencas.abrir_dados_processados()
+    analiseTriagemDoencas.gerar_grafico(dados_processados_inaptidao_triagem, ano_selecionado)
+except Exception as e:
+    st.error(f"Erro ao gerar gráfico de inaptidão na triagem: {e}")
  
